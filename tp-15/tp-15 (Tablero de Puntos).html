@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tablero de Puntos - DOM y JavaScript</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <style>
+        .puntos-display {
+            font-size: 5rem;
+            font-weight: bold;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            margin: 10px 0;
+            transition: all 0.3s;
+        }
+        .equipo-local {
+            background-color: #0d6efd;
+            color: white;
+        }
+        .equipo-visitante {
+            background-color: #dc3545;
+            color: white;
+        }
+        .botones-puntos {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .btn-punto {
+            min-width: 60px;
+        }
+        .partido-finalizado {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+        .partido-finalizado .btn-punto {
+            opacity: 0.5;
+        }
+        .configuracion {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .color-picker {
+            width: 50px;
+            height: 40px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .nombre-equipo {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        .nombre-equipo:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-1 my-sm-2 my-md-4 my-lg-5">
+    	<h1>Tablero de Puntos</h1>
+        <div class="card">
+            <div class="card-body">
+                <div class="row text-center" id="tablero">
+                    <div class="col-5">
+                        <div class="puntos-display equipo-local" id="display-local" style="background-color: #0d6efd;">
+                            <span id="puntos-local">0</span>
+                        </div>
+                        <p class="nombre-equipo" id="nombre-local" onclick="editarNombreEquipo('local')">Local</p>
+                        <div class="botones-puntos">
+                            <button class="btn btn-success btn-punto" id="btn-local-menos" onclick="cambiarPuntos('local', -1)">-</button>
+                            <button class="btn btn-primary btn-punto" id="btn-local-mas" onclick="cambiarPuntos('local', 1)">+</button>
+                        </div>
+                    </div>
+                    <div class="col-2">
+                        <span class="display-1">:</span>
+                    </div>
+                    <div class="col-5">
+                        <div class="puntos-display equipo-visitante" id="display-visitante" style="background-color: #dc3545;">
+                            <span id="puntos-visitante">0</span>
+                        </div>
+                        <p class="nombre-equipo" id="nombre-visitante" onclick="editarNombreEquipo('visitante')">Visitante</p>
+                        <div class="botones-puntos">
+                            <button class="btn btn-success btn-punto" id="btn-visitante-menos" onclick="cambiarPuntos('visitante', -1)">-</button>
+                            <button class="btn btn-primary btn-punto" id="btn-visitante-mas" onclick="cambiarPuntos('visitante', 1)">+</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <hr class="hr">
+                
+                <h2>Acciones</h2>
+                <div class="row">
+                    <div class="col-12 col-sm-4 my-1">
+                        <button class="btn d-block w-100 btn-primary" id="btn-invertir" onclick="invertirPuntaje()">
+                            Invertir Puntaje
+                        </button>
+                    </div>
+                    <div class="col-12 col-sm-4 my-1">
+                        <button class="btn d-block w-100 btn-warning" id="btn-finalizar" onclick="finalizarPartido()">
+                            Finalizar Partido
+                        </button>
+                    </div>
+                    <div class="col-12 col-sm-4 my-1">
+                        <button class="btn d-block w-100 btn-danger" id="btn-reinicio" onclick="reiniciarTablero()">
+                            Reinicio
+                        </button>
+                    </div>
+                </div>
+
+                <div class="configuracion">
+                    <h3>Configuración</h3>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Color Equipo Local:</label>
+                            <input type="color" class="color-picker" id="color-local" value="#0d6efd" onchange="cambiarColor('local', this.value)">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Color Equipo Visitante:</label>
+                            <input type="color" class="color-picker" id="color-visitante" value="#dc3545" onchange="cambiarColor('visitante', this.value)">
+                        </div>
+                    </div>
+                    <div class="alert alert-info">
+                        <strong>Atajos de teclado:</strong><br>
+                        <kbd>Q</kbd> / <kbd>A</kbd> - Sumar/Restar Local | 
+                        <kbd>W</kbd> / <kbd>S</kbd> - Sumar/Restar Visitante | 
+                        <kbd>I</kbd> - Invertir | 
+                        <kbd>F</kbd> - Finalizar | 
+                        <kbd>R</kbd> - Reiniciar
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        // Estado del tablero
+        const estado = {
+            puntosLocal: 0,
+            puntosVisitante: 0,
+            partidoFinalizado: false,
+            nombreLocal: 'Local',
+            nombreVisitante: 'Visitante',
+            colorLocal: '#0d6efd',
+            colorVisitante: '#dc3545'
+        };
+
+        /**
+         * cambiarPuntos()
+         * Incrementa o decrementa los puntos de un equipo
+         */
+        function cambiarPuntos(equipo, cantidad) {
+            if (estado.partidoFinalizado) return;
+            
+            if (equipo === 'local') {
+                estado.puntosLocal = Math.max(0, estado.puntosLocal + cantidad);
+                document.getElementById('puntos-local').textContent = estado.puntosLocal;
+            } else {
+                estado.puntosVisitante = Math.max(0, estado.puntosVisitante + cantidad);
+                document.getElementById('puntos-visitante').textContent = estado.puntosVisitante;
+            }
+        }
+
+        /**
+         * invertirPuntaje()
+         * Intercambia los puntos entre local y visitante
+         */
+        function invertirPuntaje() {
+            if (estado.partidoFinalizado) return;
+            
+            const temp = estado.puntosLocal;
+            estado.puntosLocal = estado.puntosVisitante;
+            estado.puntosVisitante = temp;
+            
+            document.getElementById('puntos-local').textContent = estado.puntosLocal;
+            document.getElementById('puntos-visitante').textContent = estado.puntosVisitante;
+        }
+
+        /**
+         * finalizarPartido()
+         * Deshabilita los botones de puntaje
+         */
+        function finalizarPartido() {
+            estado.partidoFinalizado = true;
+            const tablero = document.getElementById('tablero');
+            tablero.classList.add('partido-finalizado');
+            
+            const botones = document.querySelectorAll('.btn-punto, #btn-invertir');
+            botones.forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            document.getElementById('btn-finalizar').disabled = true;
+            document.getElementById('btn-finalizar').textContent = 'Partido Finalizado';
+        }
+
+        /**
+         * reiniciarTablero()
+         * Reinicia el tablero y habilita los botones
+         */
+        function reiniciarTablero() {
+            if (confirm('¿Estás seguro de que quieres reiniciar el tablero?')) {
+                estado.puntosLocal = 0;
+                estado.puntosVisitante = 0;
+                estado.partidoFinalizado = false;
+                
+                document.getElementById('puntos-local').textContent = 0;
+                document.getElementById('puntos-visitante').textContent = 0;
+                
+                const tablero = document.getElementById('tablero');
+                tablero.classList.remove('partido-finalizado');
+                
+                const botones = document.querySelectorAll('.btn-punto, #btn-invertir, #btn-finalizar');
+                botones.forEach(btn => {
+                    btn.disabled = false;
+                });
+                
+                document.getElementById('btn-finalizar').textContent = 'Finalizar Partido';
+            }
+        }
+
+        /**
+         * editarNombreEquipo()
+         * Permite cambiar el nombre de un equipo
+         */
+        function editarNombreEquipo(equipo) {
+            const nombreActual = equipo === 'local' ? estado.nombreLocal : estado.nombreVisitante;
+            const nuevoNombre = prompt(`Ingrese el nuevo nombre para el equipo ${equipo === 'local' ? 'local' : 'visitante'}:`, nombreActual);
+            
+            if (nuevoNombre !== null && nuevoNombre.trim() !== '') {
+                if (equipo === 'local') {
+                    estado.nombreLocal = nuevoNombre.trim();
+                    document.getElementById('nombre-local').textContent = estado.nombreLocal;
+                } else {
+                    estado.nombreVisitante = nuevoNombre.trim();
+                    document.getElementById('nombre-visitante').textContent = estado.nombreVisitante;
+                }
+            }
+        }
+
+        /**
+         * cambiarColor()
+         * Cambia el color de fondo de un equipo
+         */
+        function cambiarColor(equipo, color) {
+            const display = document.getElementById(`display-${equipo}`);
+            display.style.backgroundColor = color;
+            
+            if (equipo === 'local') {
+                estado.colorLocal = color;
+            } else {
+                estado.colorVisitante = color;
+            }
+        }
+
+        /**
+         * Manejo de atajos de teclado
+         */
+        document.addEventListener('keydown', function(e) {
+            // Ignorar si se está escribiendo en un input
+            if (e.target.tagName === 'INPUT') return;
+            
+            switch(e.key.toLowerCase()) {
+                case 'q':
+                    cambiarPuntos('local', 1);
+                    break;
+                case 'a':
+                    cambiarPuntos('local', -1);
+                    break;
+                case 'w':
+                    cambiarPuntos('visitante', 1);
+                    break;
+                case 's':
+                    cambiarPuntos('visitante', -1);
+                    break;
+                case 'i':
+                    e.preventDefault();
+                    invertirPuntaje();
+                    break;
+                case 'f':
+                    e.preventDefault();
+                    finalizarPartido();
+                    break;
+                case 'r':
+                    e.preventDefault();
+                    reiniciarTablero();
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
+

@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lista de Compras - DOM y JavaScript</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <style>
+        .producto-comprado {
+            text-decoration: line-through;
+            opacity: 0.6;
+        }
+        .producto-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .producto-item:hover {
+            background-color: #f0f0f0;
+        }
+        .producto-nombre {
+            flex: 1;
+            margin: 0 10px;
+            cursor: pointer;
+        }
+        .producto-nombre.editable {
+            border: 1px solid #007bff;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .btn-accion {
+            margin-left: 5px;
+        }
+        #lista-productos {
+            list-style: none;
+            padding: 0;
+        }
+        .checkbox-comprado {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container my-1 my-sm-2 my-md-4 my-lg-5">
+        <h1>Lista de Compras</h1>
+        <div class="card">
+            <div class="card-body">
+                <h2>Listado de Productos</h2>
+                
+                <ul id="lista-productos">
+                    <li>Pan</li>
+                </ul>
+                
+                <div class="mt-3 mb-3">
+                    <button id="btn-limpiar" class="btn btn-danger me-2">Limpiar Lista</button>
+                    <button id="btn-ordenar" class="btn btn-secondary">Ordenar Alfabéticamente</button>
+                </div>
+                
+                <hr class="hr">
+                
+                <h2>Agregar Producto</h2>
+                <form id="form-producto">
+                    <div class="input-group mb-3">
+                        <input type="text" id="input-producto" class="form-control" aria-label="Nombre del Producto" placeholder="Nombre del producto" required>
+                        <button class="btn btn-primary" type="submit">Agregar Producto</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+    <script type="text/javascript">
+        // Lista de productos en memoria
+        let productos = [];
+
+        // Cargar productos desde localStorage al iniciar
+        function cargarProductos() {
+            const productosGuardados = localStorage.getItem('listaCompras');
+            if (productosGuardados) {
+                productos = JSON.parse(productosGuardados);
+                renderizarLista();
+            } else {
+                // Si no hay productos guardados, inicializar con "Pan"
+                productos = [{ nombre: 'Pan', comprado: false, id: Date.now() }];
+                guardarProductos();
+                renderizarLista();
+            }
+        }
+
+        // Guardar productos en localStorage
+        function guardarProductos() {
+            localStorage.setItem('listaCompras', JSON.stringify(productos));
+        }
+
+        // Renderizar la lista de productos
+        function renderizarLista() {
+            const listaElement = document.getElementById('lista-productos');
+            listaElement.innerHTML = '';
+
+            productos.forEach(producto => {
+                const li = document.createElement('li');
+                li.className = 'producto-item';
+                li.dataset.id = producto.id;
+
+                // Checkbox para marcar como comprado
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.className = 'checkbox-comprado';
+                checkbox.checked = producto.comprado;
+                checkbox.addEventListener('change', () => {
+                    toggleComprado(producto.id);
+                });
+
+                // Nombre del producto (editable)
+                const nombreSpan = document.createElement('span');
+                nombreSpan.className = 'producto-nombre' + (producto.comprado ? ' producto-comprado' : '');
+                nombreSpan.textContent = producto.nombre;
+                nombreSpan.addEventListener('dblclick', () => {
+                    editarProducto(producto.id, nombreSpan);
+                });
+
+                // Botón eliminar
+                const btnEliminar = document.createElement('button');
+                btnEliminar.className = 'btn btn-sm btn-danger btn-accion';
+                btnEliminar.textContent = 'Eliminar';
+                btnEliminar.addEventListener('click', () => {
+                    eliminarProducto(producto.id);
+                });
+
+                li.appendChild(checkbox);
+                li.appendChild(nombreSpan);
+                li.appendChild(btnEliminar);
+                listaElement.appendChild(li);
+            });
+        }
+
+        /**
+         * agregarProducto()
+         * esta función se va a llamar cuando el usuario envía el formulario con el nombre del producto para agregar.
+         */
+        function agregarProducto(nombreProducto) {
+            if (nombreProducto.trim() === '') {
+                return;
+            }
+            
+            const nuevoProducto = {
+                nombre: nombreProducto.trim(),
+                comprado: false,
+                id: Date.now()
+            };
+            
+            productos.push(nuevoProducto);
+            guardarProductos();
+            renderizarLista();
+        }
+
+        /**
+         * eliminarProducto()
+         * Elimina un producto de la lista
+         */
+        function eliminarProducto(id) {
+            productos = productos.filter(p => p.id !== id);
+            guardarProductos();
+            renderizarLista();
+        }
+
+        /**
+         * limpiarLista()
+         * Elimina todos los productos
+         */
+        function limpiarLista() {
+            if (confirm('¿Estás seguro de que quieres limpiar toda la lista?')) {
+                productos = [];
+                guardarProductos();
+                renderizarLista();
+            }
+        }
+
+        /**
+         * ordenarProductos()
+         * Ordena los productos alfabéticamente
+         */
+        function ordenarProductos() {
+            productos.sort((a, b) => {
+                return a.nombre.localeCompare(b.nombre);
+            });
+            guardarProductos();
+            renderizarLista();
+        }
+
+        /**
+         * toggleComprado()
+         * Marca/desmarca un producto como comprado
+         */
+        function toggleComprado(id) {
+            const producto = productos.find(p => p.id === id);
+            if (producto) {
+                producto.comprado = !producto.comprado;
+                guardarProductos();
+                renderizarLista();
+            }
+        }
+
+        /**
+         * editarProducto()
+         * Permite editar el nombre de un producto
+         */
+        function editarProducto(id, elementoSpan) {
+            const producto = productos.find(p => p.id === id);
+            if (!producto || producto.comprado) {
+                return; // No editar si está comprado
+            }
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.className = 'form-control producto-nombre editable';
+            input.value = producto.nombre;
+            
+            elementoSpan.replaceWith(input);
+            input.focus();
+            input.select();
+
+            const guardarEdicion = () => {
+                const nuevoNombre = input.value.trim();
+                if (nuevoNombre !== '' && nuevoNombre !== producto.nombre) {
+                    producto.nombre = nuevoNombre;
+                    guardarProductos();
+                    renderizarLista();
+                } else {
+                    renderizarLista();
+                }
+            };
+
+            input.addEventListener('blur', guardarEdicion);
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    guardarEdicion();
+                }
+            });
+        }
+
+        function handlerFormulario(evento) {
+            evento.preventDefault();
+            const input = evento.target.querySelector('input');
+            const nombreProducto = input.value;
+            input.value = "";
+            agregarProducto(nombreProducto);
+        }
+
+        // Event listeners
+        document.querySelector('form').addEventListener('submit', handlerFormulario);
+        document.getElementById('btn-limpiar').addEventListener('click', limpiarLista);
+        document.getElementById('btn-ordenar').addEventListener('click', ordenarProductos);
+
+        // Cargar productos al iniciar
+        cargarProductos();
+    </script>
+</body>
+</html>
+

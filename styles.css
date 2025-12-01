@@ -1,0 +1,343 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.layout-section {
+    margin-bottom: 60px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.layout-section h2 {
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.layout {
+    border: 2px solid #ccc;
+    background-color: white;
+    min-height: 400px;
+    padding: 10px;
+    border-radius: 4px;
+}
+
+.seccion {
+    padding: 20px;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 4px;
+    margin: 5px;
+}
+
+/* Colores de las secciones */
+.seccion-1 {
+    background-color: #d4a574; /* Brownish-orange */
+}
+
+.seccion-2 {
+    background-color: #d4d574; /* Light yellow-green */
+}
+
+.seccion-3 {
+    background-color: #74d574; /* Medium green */
+}
+
+.seccion-4 {
+    background-color: #74a574; /* Darker green */
+}
+
+.seccion-5 {
+    background-color: #74d5a5; /* Light blue-green */
+}
+
+.seccion-6 {
+    background-color: #74a5d5; /* Light blue */
+}
+
+/* ============================================
+   LAYOUT 1
+   ============================================ */
+
+.layout-1 {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Mobile: todas apiladas verticalmente */
+@media (max-width: 767px) {
+    .layout-1 .seccion {
+        width: 100%;
+    }
+}
+
+/* Tablet: Grid 3x2 (3 filas, 2 columnas) */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .layout-1 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        gap: 5px;
+    }
+    
+    .layout-1 .seccion-1 { grid-column: 1; grid-row: 1; }
+    .layout-1 .seccion-2 { grid-column: 2; grid-row: 1; }
+    .layout-1 .seccion-3 { grid-column: 1; grid-row: 2; }
+    .layout-1 .seccion-4 { grid-column: 2; grid-row: 2; }
+    .layout-1 .seccion-5 { grid-column: 1; grid-row: 3; }
+    .layout-1 .seccion-6 { grid-column: 2; grid-row: 3; }
+}
+
+/* Desktop: Grid 2x3 (2 filas, 3 columnas) */
+@media (min-width: 1024px) {
+    .layout-1 {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 5px;
+    }
+    
+    .layout-1 .seccion-1 { grid-column: 1; grid-row: 1; }
+    .layout-1 .seccion-2 { grid-column: 2; grid-row: 1; }
+    .layout-1 .seccion-3 { grid-column: 3; grid-row: 1; }
+    .layout-1 .seccion-4 { grid-column: 1; grid-row: 2; }
+    .layout-1 .seccion-5 { grid-column: 2; grid-row: 2; }
+    .layout-1 .seccion-6 { grid-column: 3; grid-row: 2; }
+}
+
+/* ============================================
+   LAYOUT 2
+   ============================================ */
+
+.layout-2 {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Mobile: 4 secciones apiladas, luego 5 y 6 lado a lado */
+@media (max-width: 767px) {
+    .layout-2 .seccion-1,
+    .layout-2 .seccion-2,
+    .layout-2 .seccion-3,
+    .layout-2 .seccion-4 {
+        width: 100%;
+    }
+    
+    .layout-2 .seccion-5,
+    .layout-2 .seccion-6 {
+        width: calc(50% - 2.5px);
+        display: inline-block;
+        vertical-align: top;
+    }
+}
+
+/* Tablet: Sección 1 ocupa 2/3 arriba izquierda, espacio vacío arriba derecha, 
+   luego fila de 3 (2 ligeramente más ancha, 3 y 4 iguales), luego 5 y 6 lado a lado */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .layout-2 {
+        display: grid;
+        grid-template-columns: 1.2fr 0.9fr 0.9fr;
+        grid-template-rows: auto auto auto;
+        gap: 5px;
+    }
+    
+    .layout-2 .seccion-1 {
+        grid-column: 1 / 3;
+        grid-row: 1;
+    }
+    
+    .layout-2 .seccion-2 {
+        grid-column: 1;
+        grid-row: 2;
+    }
+    
+    .layout-2 .seccion-3 {
+        grid-column: 2;
+        grid-row: 2;
+    }
+    
+    .layout-2 .seccion-4 {
+        grid-column: 3;
+        grid-row: 2;
+    }
+    
+    .layout-2 .seccion-5 {
+        grid-column: 1;
+        grid-row: 3;
+    }
+    
+    .layout-2 .seccion-6 {
+        grid-column: 2 / 4;
+        grid-row: 3;
+    }
+}
+
+/* Desktop: Sección 1 ocupa 1/2 arriba izquierda, espacio vacío arriba derecha,
+   luego fila de 3 (2 más estrecha ~1/4, 3 y 4 más anchas e iguales), luego 5 y 6 lado a lado */
+@media (min-width: 1024px) {
+    .layout-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1.5fr 1.5fr;
+        grid-template-rows: auto auto auto;
+        gap: 5px;
+    }
+    
+    .layout-2 .seccion-1 {
+        grid-column: 1 / 3;
+        grid-row: 1;
+    }
+    
+    .layout-2 .seccion-2 {
+        grid-column: 1;
+        grid-row: 2;
+    }
+    
+    .layout-2 .seccion-3 {
+        grid-column: 2;
+        grid-row: 2;
+    }
+    
+    .layout-2 .seccion-4 {
+        grid-column: 3 / 5;
+        grid-row: 2;
+    }
+    
+    .layout-2 .seccion-5 {
+        grid-column: 1 / 3;
+        grid-row: 3;
+    }
+    
+    .layout-2 .seccion-6 {
+        grid-column: 3 / 5;
+        grid-row: 3;
+    }
+}
+
+/* ============================================
+   LAYOUT 3
+   ============================================ */
+
+.layout-3 {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Mobile: Orden específico: 1, 4, 3, 2, 6 (sin 5 visible) */
+@media (max-width: 767px) {
+    .layout-3 {
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .layout-3 .seccion-1 { order: 1; }
+    .layout-3 .seccion-4 { order: 2; }
+    .layout-3 .seccion-3 { order: 3; }
+    .layout-3 .seccion-2 { order: 4; }
+    .layout-3 .seccion-6 { order: 5; }
+    .layout-3 .seccion-5 { display: none; }
+    
+    .layout-3 .seccion {
+        width: 100%;
+    }
+}
+
+/* Tablet: Sección 1 centrada arriba, luego fila de 3 (4, 3, 2), luego 5 y 6 */
+@media (min-width: 768px) and (max-width: 1023px) {
+    .layout-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 5px;
+    }
+    
+    .layout-3 .seccion-1 {
+        grid-column: 2;
+        grid-row: 1;
+    }
+    
+    .layout-3 .seccion-4 {
+        grid-column: 1;
+        grid-row: 2;
+    }
+    
+    .layout-3 .seccion-3 {
+        grid-column: 2;
+        grid-row: 2;
+    }
+    
+    .layout-3 .seccion-2 {
+        grid-column: 3;
+        grid-row: 2;
+    }
+    
+    .layout-3 .seccion-5 {
+        grid-column: 1;
+        grid-row: 3;
+        display: block;
+    }
+    
+    .layout-3 .seccion-6 {
+        grid-column: 2 / 4;
+        grid-row: 3;
+    }
+}
+
+/* Desktop: Sección 1 centrada arriba, luego fila de 3 (2, 3, 4), luego 6 y 5 con espacio entre ellos */
+@media (min-width: 1024px) {
+    .layout-3 {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        grid-template-rows: auto auto auto;
+        gap: 5px;
+    }
+    
+    .layout-3 .seccion-1 {
+        grid-column: 2;
+        grid-row: 1;
+    }
+    
+    .layout-3 .seccion-2 {
+        grid-column: 1;
+        grid-row: 2;
+    }
+    
+    .layout-3 .seccion-3 {
+        grid-column: 2;
+        grid-row: 2;
+    }
+    
+    .layout-3 .seccion-4 {
+        grid-column: 3;
+        grid-row: 2;
+    }
+    
+    .layout-3 .seccion-6 {
+        grid-column: 1;
+        grid-row: 3;
+    }
+    
+    /* El espacio en la columna 2 de la fila 3 se crea automáticamente al no colocar nada ahí */
+    .layout-3 .seccion-5 {
+        grid-column: 3;
+        grid-row: 3;
+        display: block;
+    }
+}
+
