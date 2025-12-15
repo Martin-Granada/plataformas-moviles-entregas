@@ -1,13 +1,12 @@
-// Variables de estado de la app (let: valor cambiante)
-let ultimoConsejoEn = "";   // último consejo recibido en inglés
-let ultimoConsejoEs = "";   // cache de traducción al español
-let traducir = false;       // flag para alternar idioma
-let autoTimer = null;       // id del temporizador del modo automático
-const ESTADO_BASE = "";     // const: valor constante base para el estado
-let historyList = [];       // historial de consejos (en inglés, base)
-let totalFetched = 0;       // contador total de consejos obtenidos
 
-// Mapa de elementos del DOM (const: referencia que no cambia)
+let ultimoConsejoEn = "";   
+let ultimoConsejoEs = "";  
+let traducir = false;      
+let autoTimer = null;      
+const ESTADO_BASE = "";    
+let historyList = [];       
+let totalFetched = 0;       
+
 const el = {
   resultado: document.getElementById('resultado'),
   estado: document.getElementById('estado'),
@@ -36,12 +35,10 @@ const el = {
   fileImportFavs: document.getElementById('fileImportFavs'),
 };
 
-// function: cambia el texto de estado
 function setEstado(msg) {
   el.estado.textContent = msg || ESTADO_BASE;
 }
 
-// function: muestra un aviso temporal (toast)
 function showToast(msg) {
   el.toast.textContent = msg;
   el.toast.style.opacity = 1;
@@ -52,7 +49,6 @@ function showToast(msg) {
   }, 1800);
 }
 
-// function (async): obtiene un nuevo consejo de la API
 async function obtenerConsejo() {
   const texto = el.resultado;
   el.card.style.opacity = 0.6;
@@ -65,11 +61,10 @@ async function obtenerConsejo() {
     await actualizarVista();
     setEstado('Listo');
     saltito();
-    // estadísticas e historial
     totalFetched += 1;
     if (!historyList.includes(ultimoConsejoEn)) {
       historyList.unshift(ultimoConsejoEn);
-      historyList = historyList.slice(0, 200); // límite
+      historyList = historyList.slice(0, 200); 
       renderHistory();
     }
     renderStats();
@@ -81,12 +76,10 @@ async function obtenerConsejo() {
   el.card.style.opacity = 1;
 }
 
-// function (async): traduce solo cuando corresponde
 async function traducirSiHaceFalta() {
   if (!traducir) return '';
   if (ultimoConsejoEs) return ultimoConsejoEs;
   try {
-    // Traducción gratuita (limitaciones) usando MyMemory
     const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(ultimoConsejoEn)}&langpair=en|es`;
     const r = await fetch(url);
     const j = await r.json();
@@ -99,49 +92,43 @@ async function traducirSiHaceFalta() {
   }
 }
 
-// function (async): refresca el contenido mostrado
 async function actualizarVista() {
   const mostrar = traducir ? (await traducirSiHaceFalta() || ultimoConsejoEn) : ultimoConsejoEn;
   el.resultado.textContent = mostrar ? `"${mostrar}"` : '—';
   actualizarBotonFav();
 }
 
-// function: alterna entre mostrar en inglés/español
 function toggleTraduccion() {
   traducir = !traducir;
   el.btnTraducir.textContent = traducir ? '🌐 Mostrar en inglés' : '🌐 Mostrar en español';
   actualizarVista();
 }
 
-// function: copia el texto visible al portapapeles
 function copiar() {
   const texto = el.resultado.textContent.replace(/^"|"$/g, '');
   navigator.clipboard.writeText(texto).then(() => showToast('Copiado al portapapeles')).catch(() => showToast('No se pudo copiar'));
 }
 
-// function: comparte el texto según destino elegido
 function compartir(dest) {
   const texto = el.resultado.textContent.replace(/^"|"$/g, '');
   const url = location.href;
   if (dest === 'twitter') {
-    const u = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`; // const u: URL armada para Twitter
+    const u = `https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(url)}`;
     window.open(u, '_blank');
   } else if (dest === 'whatsapp') {
-    const u = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto + ' — ' + url)}`; // const u: URL armada para WhatsApp
+    const u = `https://api.whatsapp.com/send?text=${encodeURIComponent(texto + ' — ' + url)}`; 
     window.open(u, '_blank');
   }
 }
 
-// function: lee el texto en voz (SpeechSynthesis)
 function leer() {
   const texto = el.resultado.textContent.replace(/^"|"$/g, '');
   try { window.speechSynthesis.cancel(); } catch {}
-  const utter = new SpeechSynthesisUtterance(texto); // const utter: objeto de síntesis de voz
+  const utter = new SpeechSynthesisUtterance(texto);
   utter.lang = traducir ? 'es-ES' : 'en-US';
   window.speechSynthesis.speak(utter);
 }
 
-// Favoritos en localStorage (CRUD simple)
 function getFavs() {
   try { return JSON.parse(localStorage.getItem('advice_favs') || '[]'); } catch { return []; }
 }
@@ -168,7 +155,7 @@ function toggleFavorito() {
 }
 function verFavoritos() {
   const favs = getFavs();
-  if (favs.length === 0) { showToast('Sin favoritos aún'); return; } // guard clause: nada que mostrar
+  if (favs.length === 0) { showToast('Sin favoritos aún'); return; } 
   const elegido = prompt('Favoritos:\n\n' + favs.map((f, i) => `${i+1}. ${f}`).join('\n') + '\n\nIngresa número para mostrar, o 0 para borrar todos:');
   if (elegido === null) return;
   const n = parseInt(elegido, 10);
@@ -182,7 +169,6 @@ function verFavoritos() {
   }
 }
 
-// function: activa/desactiva el modo automático
 function toggleAuto() {
   if (el.autoChk.checked) {
     const seg = Math.max(5, parseInt(el.autoSeg.value, 10) || 15);
@@ -196,13 +182,11 @@ function toggleAuto() {
   }
 }
 
-// Pequeña animación de la tarjeta al actualizar
 function saltito() {
   el.card.style.transform = 'translateY(-2px)';
   setTimeout(() => { el.card.style.transform = 'translateY(0)'; }, 140);
 }
 
-// Render: Historial
 function renderHistory() {
   if (!el.historyList) return;
   if (historyList.length === 0) {
@@ -220,7 +204,6 @@ function renderHistory() {
   `).join('');
 }
 
-// Render: Favoritos
 function renderFavorites() {
   if (!el.favList) return;
   const favs = getFavs();
@@ -241,14 +224,12 @@ function renderFavorites() {
   renderStats();
 }
 
-// Render: Estadísticas
 function renderStats() {
   if (el.statTotalFetched) el.statTotalFetched.textContent = String(totalFetched);
   if (el.statTotalFavs) el.statTotalFavs.textContent = String(getFavs().length);
   if (el.statUniqueHistory) el.statUniqueHistory.textContent = String(historyList.length);
 }
 
-// Utilidades de listas
 function decodeTextParam(s) { try { return decodeURIComponent(s); } catch { return s; } }
 function copiarTexto(encoded) {
   const t = decodeTextParam(encoded);
@@ -270,7 +251,6 @@ function removeFav(encoded) {
   renderFavorites();
 }
 
-// Export/Import
 function downloadJSON(filename, data) {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -279,7 +259,6 @@ function downloadJSON(filename, data) {
   URL.revokeObjectURL(url);
 }
 
-// Configuración y tema
 function applyTheme(theme) {
   const root = document.documentElement;
   if (theme === 'auto') {
@@ -311,7 +290,6 @@ function applySettingsRuntime(s) {
   }
 }
 
-// Atajos de teclado
 function setupShortcuts() {
   document.addEventListener('keydown', (e) => {
     if (e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA')) return;
@@ -324,9 +302,7 @@ function setupShortcuts() {
   });
 }
 
-// Inicialización
 function init() {
-  // Cargar settings
   const settings = loadSettings();
   applySettingsToUI({
     theme: settings.theme || 'auto',
@@ -341,7 +317,6 @@ function init() {
     autoSeconds: settings.autoSeconds || 15
   });
 
-  // Eventos UI
   if (el.themeSelect) el.themeSelect.addEventListener('change', () => {
     const s = loadSettings(); s.theme = el.themeSelect.value; saveSettings(s); applyTheme(s.theme);
   });
@@ -393,7 +368,6 @@ function init() {
   obtenerConsejo();
 }
 
-// Ejecutar init al cargar
 document.addEventListener('DOMContentLoaded', init);
 
 
